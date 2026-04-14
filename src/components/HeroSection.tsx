@@ -1,8 +1,14 @@
 import heroImage from "@/assets/hero-cavalier.jpg";
+import SocialLinksInline from "@/components/SocialLinks";
 
 const HeroSection = () => {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Social links in top-right */}
+      <div className="absolute top-6 right-6 z-20">
+        <SocialLinksInline />
+      </div>
+
       <div className="absolute inset-0">
         <img
           src={heroImage}
