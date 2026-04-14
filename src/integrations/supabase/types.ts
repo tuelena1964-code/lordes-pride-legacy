@@ -14,7 +14,99 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      puppies: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string | null
+          name: string
+          sort_order: number | null
+          status: string
+          trait: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          name: string
+          sort_order?: number | null
+          status?: string
+          trait?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          name?: string
+          sort_order?: number | null
+          status?: string
+          trait?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      site_content: {
+        Row: {
+          content: string
+          id: string
+          section: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          id: string
+          section: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          id?: string
+          section?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      submissions: {
+        Row: {
+          about: string | null
+          city: string | null
+          created_at: string
+          experience: string | null
+          id: string
+          lifestyle: string | null
+          looking_for: string | null
+          name: string
+          phone: string
+          status: string
+        }
+        Insert: {
+          about?: string | null
+          city?: string | null
+          created_at?: string
+          experience?: string | null
+          id?: string
+          lifestyle?: string | null
+          looking_for?: string | null
+          name: string
+          phone: string
+          status?: string
+        }
+        Update: {
+          about?: string | null
+          city?: string | null
+          created_at?: string
+          experience?: string | null
+          id?: string
+          lifestyle?: string | null
+          looking_for?: string | null
+          name?: string
+          phone?: string
+          status?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
