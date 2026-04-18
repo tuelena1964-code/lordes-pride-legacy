@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
+import PuppyPhotos from "@/components/admin/PuppyPhotos";
 
 type Submission = Tables<"submissions">;
 type Puppy = Tables<"puppies">;
@@ -310,69 +311,60 @@ const Admin = () => {
             {/* Puppies list */}
             <div className="space-y-4">
               {puppies.map((p) => (
-                <div key={p.id} className="bg-card p-4 flex items-center gap-4">
-                  {p.image_url && (
-                    <img src={p.image_url} alt={p.name} className="w-16 h-16 object-cover" />
-                  )}
-                  <div className="flex-1">
-                    {editingPuppy === p.id ? (
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                        <input
-                          defaultValue={p.name}
-                          onBlur={(e) => updatePuppy(p.id, { name: e.target.value })}
-                          className={inputClass}
-                        />
-                        <input
-                          defaultValue={p.trait || ""}
-                          onBlur={(e) => updatePuppy(p.id, { trait: e.target.value || null })}
-                          className={inputClass}
-                        />
-                        <select
-                          defaultValue={p.status}
-                          onChange={(e) => updatePuppy(p.id, { status: e.target.value })}
-                          className={inputClass}
-                        >
-                          {PUPPY_STATUS_OPTIONS.map((o) => (
-                            <option key={o.value} value={o.value}>{o.label}</option>
-                          ))}
-                        </select>
-                      </div>
-                    ) : (
-                      <div>
-                        <span className="text-foreground font-light">{p.name}</span>
-                        <span className="text-muted-foreground/50 text-xs ml-3">
-                          {PUPPY_STATUS_OPTIONS.find((o) => o.value === p.status)?.label || p.status}
-                        </span>
-                        {p.trait && <span className="text-muted-foreground/50 text-xs ml-3">{p.trait}</span>}
-                      </div>
+                <div key={p.id} className="bg-card p-4">
+                  <div className="flex items-center gap-4">
+                    {p.image_url && (
+                      <img src={p.image_url} alt={p.name} className="w-16 h-16 object-cover" />
                     )}
+                    <div className="flex-1">
+                      {editingPuppy === p.id ? (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                          <input
+                            defaultValue={p.name}
+                            onBlur={(e) => updatePuppy(p.id, { name: e.target.value })}
+                            className={inputClass}
+                          />
+                          <input
+                            defaultValue={p.trait || ""}
+                            onBlur={(e) => updatePuppy(p.id, { trait: e.target.value || null })}
+                            className={inputClass}
+                          />
+                          <select
+                            defaultValue={p.status}
+                            onChange={(e) => updatePuppy(p.id, { status: e.target.value })}
+                            className={inputClass}
+                          >
+                            {PUPPY_STATUS_OPTIONS.map((o) => (
+                              <option key={o.value} value={o.value}>{o.label}</option>
+                            ))}
+                          </select>
+                        </div>
+                      ) : (
+                        <div>
+                          <span className="text-foreground font-light">{p.name}</span>
+                          <span className="text-muted-foreground/50 text-xs ml-3">
+                            {PUPPY_STATUS_OPTIONS.find((o) => o.value === p.status)?.label || p.status}
+                          </span>
+                          {p.trait && <span className="text-muted-foreground/50 text-xs ml-3">{p.trait}</span>}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setEditingPuppy(editingPuppy === p.id ? null : p.id)}
+                        className="text-xs text-muted-foreground/50 hover:text-primary transition-colors"
+                      >
+                        {editingPuppy === p.id ? "Готово" : "Ред."}
+                      </button>
+                      <button
+                        onClick={() => deletePuppy(p.id)}
+                        className="text-xs text-destructive/70 hover:text-destructive transition-colors"
+                      >
+                        Удалить
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <label className="text-xs text-muted-foreground/50 hover:text-primary cursor-pointer transition-colors">
-                      Фото
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          const f = e.target.files?.[0];
-                          if (f) updatePuppyPhoto(p.id, f);
-                        }}
-                      />
-                    </label>
-                    <button
-                      onClick={() => setEditingPuppy(editingPuppy === p.id ? null : p.id)}
-                      className="text-xs text-muted-foreground/50 hover:text-primary transition-colors"
-                    >
-                      {editingPuppy === p.id ? "Готово" : "Ред."}
-                    </button>
-                    <button
-                      onClick={() => deletePuppy(p.id)}
-                      className="text-xs text-destructive/70 hover:text-destructive transition-colors"
-                    >
-                      Удалить
-                    </button>
-                  </div>
+                  <PuppyPhotos puppyId={p.id} />
                 </div>
               ))}
               {puppies.length === 0 && (
