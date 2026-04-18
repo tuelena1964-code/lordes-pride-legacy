@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
+import PuppyPhotos from "@/components/admin/PuppyPhotos";
 
 type Submission = Tables<"submissions">;
 type Puppy = Tables<"puppies">;
