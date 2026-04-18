@@ -47,6 +47,41 @@ export type Database = {
         }
         Relationships: []
       }
+      puppy_photos: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string
+          is_cover: boolean
+          puppy_id: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url: string
+          is_cover?: boolean
+          puppy_id: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string
+          is_cover?: boolean
+          puppy_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "puppy_photos_puppy_id_fkey"
+            columns: ["puppy_id"]
+            isOneToOne: false
+            referencedRelation: "puppies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_content: {
         Row: {
           content: string
