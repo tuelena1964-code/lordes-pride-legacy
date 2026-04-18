@@ -24,11 +24,14 @@ const Admin = () => {
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Puppy form
   const [puppyForm, setPuppyForm] = useState({ name: "", trait: "", status: "available" });
   const [puppyFile, setPuppyFile] = useState<File | null>(null);
   const [editingPuppy, setEditingPuppy] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<{ name: string; trait: string; status: string }>({ name: "", trait: "", status: "available" });
+  const [editForm, setEditForm] = useState<{ name: string; trait: string; status: string }>({
+    name: "",
+    trait: "",
+    status: "available",
+  });
 
   const startEdit = (p: Puppy) => {
     setEditingPuppy(p.id);
@@ -53,11 +56,15 @@ const Admin = () => {
       }
       fetchData();
     };
+
     checkAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_OUT") navigate("/admin-login");
     });
+
     return () => subscription.unsubscribe();
   }, [navigate]);
 
@@ -67,6 +74,7 @@ const Admin = () => {
       supabase.from("submissions").select("*").order("created_at", { ascending: false }),
       supabase.from("puppies").select("*").order("sort_order", { ascending: true }),
     ]);
+
     if (subRes.data) setSubmissions(subRes.data);
     if (pupRes.data) setPuppies(pupRes.data);
     setLoading(false);
@@ -91,10 +99,12 @@ const Admin = () => {
     const ext = file.name.split(".").pop();
     const path = `puppies/${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from("photos").upload(path, file);
+
     if (error) {
       toast({ title: "Ошибка загрузки фото", variant: "destructive" });
       return null;
     }
+
     const { data } = supabase.storage.from("photos").getPublicUrl(path);
     return data.publicUrl;
   };
@@ -104,10 +114,12 @@ const Admin = () => {
       toast({ title: "Введите имя щенка", variant: "destructive" });
       return;
     }
+
     let imageUrl: string | null = null;
     if (puppyFile) {
       imageUrl = await uploadPuppyPhoto(puppyFile);
     }
+
     const { error } = await supabase.from("puppies").insert({
       name: puppyForm.name.trim(),
       trait: puppyForm.trait.trim() || null,
@@ -115,6 +127,7 @@ const Admin = () => {
       image_url: imageUrl,
       sort_order: puppies.length,
     });
+
     if (error) {
       toast({ title: "Ошибка добавления", variant: "destructive" });
     } else {
@@ -146,14 +159,9 @@ const Admin = () => {
     }
   };
 
-  const updatePuppyPhoto = async (id: string, file: File) => {
-    const imageUrl = await uploadPuppyPhoto(file);
-    if (imageUrl) {
-      await updatePuppy(id, { image_url: imageUrl });
-    }
-  };
-
-  const inputClass = "w-full bg-card border border-border px-3 py-2 text-foreground text-sm font-light focus:border-primary/60 outline-none transition-colors";
+  const inputClass =
+    "w-full bg-card border border-border px-3 py-2 text-foreground text-sm font-light focus:border-primary/60 outline-none transition-colors";
+  const helperTextClass = "text-xs text-muted-foreground/60 font-light";
 
   if (loading) {
     return (
@@ -166,7 +174,6 @@ const Admin = () => {
   return (
     <main className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto px-6 py-8">
-        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-xl font-light text-foreground tracking-wider">Панель управления</h1>
           <button onClick={handleLogout} className="text-sm text-muted-foreground/50 hover:text-primary transition-colors">
@@ -174,23 +181,28 @@ const Admin = () => {
           </button>
         </div>
 
-        {/* Tabs */}
         <div className="flex gap-6 mb-8 border-b border-border">
           <button
-            onClick={() => { setTab("submissions"); setSelectedSubmission(null); }}
-            className={`pb-3 text-sm tracking-wider uppercase transition-colors ${tab === "submissions" ? "text-primary border-b border-primary" : "text-muted-foreground/50 hover:text-foreground"}`}
+            onClick={() => {
+              setTab("submissions");
+              setSelectedSubmission(null);
+            }}
+            className={`pb-3 text-sm tracking-wider uppercase transition-colors ${
+              tab === "submissions" ? "text-primary border-b border-primary" : "text-muted-foreground/50 hover:text-foreground"
+            }`}
           >
             Заявки ({submissions.length})
           </button>
           <button
             onClick={() => setTab("puppies")}
-            className={`pb-3 text-sm tracking-wider uppercase transition-colors ${tab === "puppies" ? "text-primary border-b border-primary" : "text-muted-foreground/50 hover:text-foreground"}`}
+            className={`pb-3 text-sm tracking-wider uppercase transition-colors ${
+              tab === "puppies" ? "text-primary border-b border-primary" : "text-muted-foreground/50 hover:text-foreground"
+            }`}
           >
             Щенки ({puppies.length})
           </button>
         </div>
 
-        {/* Submissions tab */}
         {tab === "submissions" && !selectedSubmission && (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -210,31 +222,37 @@ const Admin = () => {
                     onClick={() => setSelectedSubmission(s)}
                     className="border-b border-border/50 cursor-pointer hover:bg-card/50 transition-colors"
                   >
-                    <td className="py-3 text-muted-foreground font-light">
-                      {new Date(s.created_at).toLocaleDateString("ru-RU")}
-                    </td>
+                    <td className="py-3 text-muted-foreground font-light">{new Date(s.created_at).toLocaleDateString("ru-RU")}</td>
                     <td className="py-3 text-foreground font-light">{s.name}</td>
                     <td className="py-3 text-muted-foreground font-light">{s.city || "—"}</td>
                     <td className="py-3 text-muted-foreground font-light">{s.phone}</td>
                     <td className="py-3">
-                      <span className={`text-xs tracking-wider uppercase ${
-                        s.status === "Новая" ? "text-primary" :
-                        s.status === "В работе" ? "text-yellow-500" : "text-muted-foreground/50"
-                      }`}>
+                      <span
+                        className={`text-xs tracking-wider uppercase ${
+                          s.status === "Новая"
+                            ? "text-primary"
+                            : s.status === "В работе"
+                              ? "text-primary/80"
+                              : "text-muted-foreground/50"
+                        }`}
+                      >
                         {s.status}
                       </span>
                     </td>
                   </tr>
                 ))}
                 {submissions.length === 0 && (
-                  <tr><td colSpan={5} className="py-8 text-center text-muted-foreground/50 font-light">Заявок пока нет</td></tr>
+                  <tr>
+                    <td colSpan={5} className="py-8 text-center text-muted-foreground/50 font-light">
+                      Заявок пока нет
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>
           </div>
         )}
 
-        {/* Submission detail */}
         {tab === "submissions" && selectedSubmission && (
           <div>
             <button onClick={() => setSelectedSubmission(null)} className="text-sm text-primary/70 hover:text-primary mb-6 tracking-wider">
@@ -243,15 +261,25 @@ const Admin = () => {
             <div className="bg-card p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-light text-foreground">{selectedSubmission.name}</h2>
-                <span className="text-xs text-muted-foreground">
-                  {new Date(selectedSubmission.created_at).toLocaleString("ru-RU")}
-                </span>
+                <span className="text-xs text-muted-foreground">{new Date(selectedSubmission.created_at).toLocaleString("ru-RU")}</span>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div><span className="text-muted-foreground/50">Город:</span> <span className="text-foreground ml-2">{selectedSubmission.city || "—"}</span></div>
-                <div><span className="text-muted-foreground/50">Телефон:</span> <span className="text-foreground ml-2">{selectedSubmission.phone}</span></div>
-                <div><span className="text-muted-foreground/50">Опыт:</span> <span className="text-foreground ml-2">{selectedSubmission.experience || "—"}</span></div>
-                <div><span className="text-muted-foreground/50">Кого ищет:</span> <span className="text-foreground ml-2">{selectedSubmission.looking_for || "—"}</span></div>
+                <div>
+                  <span className="text-muted-foreground/50">Город:</span>
+                  <span className="text-foreground ml-2">{selectedSubmission.city || "—"}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground/50">Телефон:</span>
+                  <span className="text-foreground ml-2">{selectedSubmission.phone}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground/50">Опыт:</span>
+                  <span className="text-foreground ml-2">{selectedSubmission.experience || "—"}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground/50">Кого ищет:</span>
+                  <span className="text-foreground ml-2">{selectedSubmission.looking_for || "—"}</span>
+                </div>
               </div>
               <div className="text-sm">
                 <span className="text-muted-foreground/50">Образ жизни:</span>
@@ -280,61 +308,107 @@ const Admin = () => {
           </div>
         )}
 
-        {/* Puppies tab */}
         {tab === "puppies" && (
           <div className="space-y-8">
-            {/* Add puppy form */}
-            <div className="bg-card p-6">
-              <h3 className="text-sm tracking-wider uppercase text-muted-foreground/70 mb-4">Добавить щенка</h3>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <input
-                  placeholder="Имя *"
-                  value={puppyForm.name}
-                  onChange={(e) => setPuppyForm({ ...puppyForm, name: e.target.value })}
-                  className={inputClass}
-                />
-                <input
-                  placeholder="Характеристика"
-                  value={puppyForm.trait}
-                  onChange={(e) => setPuppyForm({ ...puppyForm, trait: e.target.value })}
-                  className={inputClass}
-                />
-                <select
-                  value={puppyForm.status}
-                  onChange={(e) => setPuppyForm({ ...puppyForm, status: e.target.value })}
-                  className={inputClass}
-                >
-                  {PUPPY_STATUS_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
-                  ))}
-                </select>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setPuppyFile(e.target.files?.[0] || null)}
-                  className={`${inputClass} file:bg-transparent file:border-0 file:text-muted-foreground file:text-xs`}
-                />
+            <div className="bg-card p-6 space-y-4">
+              <div>
+                <h3 className="text-sm tracking-wider uppercase text-muted-foreground/70">Добавить щенка</h3>
+                <p className={`${helperTextClass} mt-2`}>
+                  Здесь загружается только обложка карточки. Дополнительные фото добавляются ниже у уже созданного щенка и не заменяют обложку.
+                </p>
               </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs tracking-wider uppercase text-muted-foreground/70">Имя щенка *</label>
+                  <input
+                    placeholder="Например, Чижик"
+                    value={puppyForm.name}
+                    onChange={(e) => setPuppyForm({ ...puppyForm, name: e.target.value })}
+                    className={inputClass}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs tracking-wider uppercase text-muted-foreground/70">Статус</label>
+                  <select
+                    value={puppyForm.status}
+                    onChange={(e) => setPuppyForm({ ...puppyForm, status: e.target.value })}
+                    className={inputClass}
+                  >
+                    {PUPPY_STATUS_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-xs tracking-wider uppercase text-muted-foreground/70">Характеристика</label>
+                  <input
+                    placeholder="Короткое описание характера"
+                    value={puppyForm.trait}
+                    onChange={(e) => setPuppyForm({ ...puppyForm, trait: e.target.value })}
+                    className={inputClass}
+                  />
+                </div>
+
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-xs tracking-wider uppercase text-muted-foreground/70">Обложка карточки</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setPuppyFile(e.target.files?.[0] || null)}
+                    className={`${inputClass} file:bg-transparent file:border-0 file:text-muted-foreground file:text-xs`}
+                  />
+                  <p className={helperTextClass}>
+                    {puppyFile ? `Выбран файл: ${puppyFile.name}` : "Можно оставить пустым и добавить позже."}
+                  </p>
+                </div>
+              </div>
+
               <button
                 onClick={addPuppy}
-                className="mt-4 px-6 py-2 bg-primary text-primary-foreground text-xs tracking-widest uppercase hover:bg-primary/90 transition-colors"
+                className="px-6 py-2 bg-primary text-primary-foreground text-xs tracking-widest uppercase hover:bg-primary/90 transition-colors"
               >
                 Добавить
               </button>
             </div>
 
-            {/* Puppies list */}
             <div className="space-y-4">
               {puppies.map((p) => (
-                <div key={p.id} className="bg-card p-4">
+                <div key={p.id} className="bg-card p-4 space-y-4">
                   <div className="flex items-start gap-4">
-                    {p.image_url && (
-                      <img src={p.image_url} alt={p.name} className="w-16 h-16 object-cover flex-shrink-0" />
-                    )}
+                    {p.image_url && <img src={p.image_url} alt={p.name} className="w-16 h-16 object-cover flex-shrink-0" />}
+
                     <div className="flex-1 min-w-0">
                       {editingPuppy === p.id ? (
-                        <div className="space-y-3">
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                        <div className="space-y-4 border border-border/60 p-4">
+                          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                            <div>
+                              <p className="text-xs tracking-widest uppercase text-primary">Редактирование щенка</p>
+                              <p className={`${helperTextClass} mt-1`}>
+                                Сохраните имя, статус и описание здесь. Дополнительные фото добавляются ниже отдельным блоком и не меняют обложку.
+                              </p>
+                            </div>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => saveEdit(p.id)}
+                                className="px-4 py-2 bg-primary text-primary-foreground text-xs tracking-widest uppercase hover:bg-primary/90 transition-colors"
+                              >
+                                Сохранить
+                              </button>
+                              <button
+                                onClick={() => setEditingPuppy(null)}
+                                className="px-4 py-2 border border-border text-muted-foreground text-xs tracking-widest uppercase hover:text-foreground transition-colors"
+                              >
+                                Отмена
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <input
                               placeholder="Имя"
                               value={editForm.name}
@@ -353,35 +427,27 @@ const Admin = () => {
                               className={inputClass}
                             >
                               {PUPPY_STATUS_OPTIONS.map((o) => (
-                                <option key={o.value} value={o.value}>{o.label}</option>
+                                <option key={o.value} value={o.value}>
+                                  {o.label}
+                                </option>
                               ))}
                             </select>
                           </div>
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => saveEdit(p.id)}
-                              className="px-4 py-2 bg-primary text-primary-foreground text-xs tracking-widest uppercase hover:bg-primary/90 transition-colors"
-                            >
-                              Сохранить
-                            </button>
-                            <button
-                              onClick={() => setEditingPuppy(null)}
-                              className="px-4 py-2 border border-border text-muted-foreground text-xs tracking-widest uppercase hover:text-foreground transition-colors"
-                            >
-                              Отмена
-                            </button>
-                          </div>
                         </div>
                       ) : (
-                        <div>
-                          <span className="text-foreground font-light">{p.name}</span>
-                          <span className="text-muted-foreground/50 text-xs ml-3">
-                            {PUPPY_STATUS_OPTIONS.find((o) => o.value === p.status)?.label || p.status}
-                          </span>
-                          {p.trait && <span className="text-muted-foreground/50 text-xs ml-3">{p.trait}</span>}
+                        <div className="space-y-2">
+                          <div>
+                            <span className="text-foreground font-light">{p.name}</span>
+                            <span className="text-muted-foreground/50 text-xs ml-3">
+                              {PUPPY_STATUS_OPTIONS.find((o) => o.value === p.status)?.label || p.status}
+                            </span>
+                          </div>
+                          {p.trait && <p className="text-muted-foreground/70 text-sm font-light">{p.trait}</p>}
+                          <p className={helperTextClass}>Обложка карточки отображается слева. Дополнительные фото для галереи находятся ниже.</p>
                         </div>
                       )}
                     </div>
+
                     {editingPuppy !== p.id && (
                       <div className="flex gap-3 flex-shrink-0">
                         <button
@@ -399,12 +465,17 @@ const Admin = () => {
                       </div>
                     )}
                   </div>
-                  <PuppyPhotos puppyId={p.id} />
+
+                  <div>
+                    <p className="text-xs tracking-widest uppercase text-muted-foreground/70">Галерея щенка</p>
+                    <p className={`${helperTextClass} mt-1`}>
+                      Добавляйте 2–3 фото сюда — они появятся в карточке на главной и не заменят обложку.
+                    </p>
+                    <PuppyPhotos puppyId={p.id} />
+                  </div>
                 </div>
               ))}
-              {puppies.length === 0 && (
-                <p className="text-center text-muted-foreground/50 font-light py-8">Щенков пока нет</p>
-              )}
+              {puppies.length === 0 && <p className="text-center text-muted-foreground/50 font-light py-8">Щенков пока нет</p>}
             </div>
           </div>
         )}
