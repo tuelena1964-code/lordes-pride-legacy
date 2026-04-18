@@ -28,6 +28,21 @@ const Admin = () => {
   const [puppyForm, setPuppyForm] = useState({ name: "", trait: "", status: "available" });
   const [puppyFile, setPuppyFile] = useState<File | null>(null);
   const [editingPuppy, setEditingPuppy] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<{ name: string; trait: string; status: string }>({ name: "", trait: "", status: "available" });
+
+  const startEdit = (p: Puppy) => {
+    setEditingPuppy(p.id);
+    setEditForm({ name: p.name, trait: p.trait || "", status: p.status });
+  };
+
+  const saveEdit = async (id: string) => {
+    await updatePuppy(id, {
+      name: editForm.name.trim(),
+      trait: editForm.trait.trim() || null,
+      status: editForm.status,
+    });
+    setEditingPuppy(null);
+  };
 
   useEffect(() => {
     const checkAuth = async () => {
