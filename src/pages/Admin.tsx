@@ -28,6 +28,21 @@ const Admin = () => {
   const [puppyForm, setPuppyForm] = useState({ name: "", trait: "", status: "available" });
   const [puppyFile, setPuppyFile] = useState<File | null>(null);
   const [editingPuppy, setEditingPuppy] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<{ name: string; trait: string; status: string }>({ name: "", trait: "", status: "available" });
+
+  const startEdit = (p: Puppy) => {
+    setEditingPuppy(p.id);
+    setEditForm({ name: p.name, trait: p.trait || "", status: p.status });
+  };
+
+  const saveEdit = async (id: string) => {
+    await updatePuppy(id, {
+      name: editForm.name.trim(),
+      trait: editForm.trait.trim() || null,
+      status: editForm.status,
+    });
+    setEditingPuppy(null);
+  };
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -312,32 +327,50 @@ const Admin = () => {
             <div className="space-y-4">
               {puppies.map((p) => (
                 <div key={p.id} className="bg-card p-4">
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-start gap-4">
                     {p.image_url && (
-                      <img src={p.image_url} alt={p.name} className="w-16 h-16 object-cover" />
+                      <img src={p.image_url} alt={p.name} className="w-16 h-16 object-cover flex-shrink-0" />
                     )}
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       {editingPuppy === p.id ? (
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                          <input
-                            defaultValue={p.name}
-                            onBlur={(e) => updatePuppy(p.id, { name: e.target.value })}
-                            className={inputClass}
-                          />
-                          <input
-                            defaultValue={p.trait || ""}
-                            onBlur={(e) => updatePuppy(p.id, { trait: e.target.value || null })}
-                            className={inputClass}
-                          />
-                          <select
-                            defaultValue={p.status}
-                            onChange={(e) => updatePuppy(p.id, { status: e.target.value })}
-                            className={inputClass}
-                          >
-                            {PUPPY_STATUS_OPTIONS.map((o) => (
-                              <option key={o.value} value={o.value}>{o.label}</option>
-                            ))}
-                          </select>
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                            <input
+                              placeholder="Имя"
+                              value={editForm.name}
+                              onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                              className={inputClass}
+                            />
+                            <input
+                              placeholder="Характеристика"
+                              value={editForm.trait}
+                              onChange={(e) => setEditForm({ ...editForm, trait: e.target.value })}
+                              className={inputClass}
+                            />
+                            <select
+                              value={editForm.status}
+                              onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
+                              className={inputClass}
+                            >
+                              {PUPPY_STATUS_OPTIONS.map((o) => (
+                                <option key={o.value} value={o.value}>{o.label}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => saveEdit(p.id)}
+                              className="px-4 py-2 bg-primary text-primary-foreground text-xs tracking-widest uppercase hover:bg-primary/90 transition-colors"
+                            >
+                              Сохранить
+                            </button>
+                            <button
+                              onClick={() => setEditingPuppy(null)}
+                              className="px-4 py-2 border border-border text-muted-foreground text-xs tracking-widest uppercase hover:text-foreground transition-colors"
+                            >
+                              Отмена
+                            </button>
+                          </div>
                         </div>
                       ) : (
                         <div>
@@ -349,20 +382,22 @@ const Admin = () => {
                         </div>
                       )}
                     </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setEditingPuppy(editingPuppy === p.id ? null : p.id)}
-                        className="text-xs text-muted-foreground/50 hover:text-primary transition-colors"
-                      >
-                        {editingPuppy === p.id ? "Готово" : "Ред."}
-                      </button>
-                      <button
-                        onClick={() => deletePuppy(p.id)}
-                        className="text-xs text-destructive/70 hover:text-destructive transition-colors"
-                      >
-                        Удалить
-                      </button>
-                    </div>
+                    {editingPuppy !== p.id && (
+                      <div className="flex gap-3 flex-shrink-0">
+                        <button
+                          onClick={() => startEdit(p)}
+                          className="text-xs text-muted-foreground/50 hover:text-primary transition-colors tracking-wider uppercase"
+                        >
+                          Редактировать
+                        </button>
+                        <button
+                          onClick={() => deletePuppy(p.id)}
+                          className="text-xs text-destructive/70 hover:text-destructive transition-colors tracking-wider uppercase"
+                        >
+                          Удалить
+                        </button>
+                      </div>
+                    )}
                   </div>
                   <PuppyPhotos puppyId={p.id} />
                 </div>
